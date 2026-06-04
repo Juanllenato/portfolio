@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Design system — "Confidential Dossier" · dark + violet
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0b;
+  --bg-elevated: #111114;
+  --foreground: #e5e7eb;
+  --text-dim: #8a8f98;
+  --white: #ffffff;
+
+  --accent: #7c3aed;        /* violet (primary) */
+  --accent-light: #a78bfa;  /* hover / glow */
+  --accent-2: #22d3ee;      /* cyan (accent / declassified) */
+  --confidential: #ef4444;  /* red stamp */
+
+  --border: rgba(255, 255, 255, 0.08);
+  --glow: rgba(124, 58, 237, 0.30);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-bg-elevated: var(--bg-elevated);
   --color-foreground: var(--foreground);
+  --color-dim: var(--text-dim);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-2: var(--accent-2);
+  --color-confidential: var(--confidential);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle technical grid background (Evervault-like) */
+.grid-bg {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* Mono label, e.g. SECTION_01 // PROJECTS */
+.mono-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.text-gradient {
+  background: linear-gradient(180deg, #ffffff 0%, #a78bfa 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
