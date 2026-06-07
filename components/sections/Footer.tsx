@@ -9,6 +9,7 @@ const links = [
   },
   { label: "Email", href: "mailto:juans.perezc@gmail.com", external: false },
   { label: "CV", href: "/cv", external: false },
+  { label: "Download CV (PDF)", href: "/Juan_Perez_AI_Engineer_CV.pdf", external: true },
 ];
 
 export default function Footer() {

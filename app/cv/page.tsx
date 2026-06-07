@@ -113,7 +113,17 @@ export default function CvPage() {
         >
           ← Back
         </a>
-        <PrintButton />
+        <div className="flex items-center gap-3">
+          <a
+            href="/Juan_Perez_AI_Engineer_CV.pdf"
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-accent-light"
+          >
+            Download PDF
+          </a>
+          <PrintButton />
+        </div>
       </div>
 
       <article className="cv-sheet surface mx-auto max-w-3xl rounded-xl p-8 sm:p-10">
