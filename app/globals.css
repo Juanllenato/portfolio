@@ -5,18 +5,19 @@
    ============================================================ */
 :root {
   --background: #0a0a0b;
-  --bg-elevated: #111114;
-  --foreground: #e5e7eb;
-  --text-dim: #8a8f98;
+  --bg-elevated: #14131a;       /* slightly lifted, catches light */
+  --foreground: #eef0f6;        /* brighter primary text */
+  --text-dim: #abb2c2;          /* brighter, more readable secondary */
   --white: #ffffff;
 
-  --accent: #7c3aed;        /* violet (primary) */
-  --accent-light: #a78bfa;  /* hover / glow */
-  --accent-2: #22d3ee;      /* cyan (accent / declassified) */
-  --confidential: #ef4444;  /* red stamp */
+  --accent: #8b5cf6;            /* brighter violet (primary) */
+  --accent-light: #b794ff;     /* vivid hover / glow */
+  --accent-2: #34e0f0;         /* brighter cyan accent */
+  --confidential: #ef4444;     /* red stamp */
 
-  --border: rgba(255, 255, 255, 0.08);
-  --glow: rgba(124, 58, 237, 0.30);
+  --border: rgba(255, 255, 255, 0.12);        /* more visible, light-catching */
+  --border-bright: rgba(255, 255, 255, 0.2);
+  --glow: rgba(139, 92, 246, 0.45);           /* stronger accent glow */
 }
 
 @theme inline {
@@ -64,10 +65,38 @@ body {
 }
 
 .text-gradient {
-  background: linear-gradient(180deg, #ffffff 0%, #a78bfa 120%);
+  background: linear-gradient(180deg, #ffffff 0%, #b794ff 130%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* light-catching top sheen for elevated surfaces */
+.surface {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 40%),
+    var(--bg-elevated);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Slim, themed scrollbar */
+.scrollbar-slim {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.4) transparent;
+}
+.scrollbar-slim::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 250, 0.55);
 }
 
 @media (prefers-reduced-motion: reduce) {

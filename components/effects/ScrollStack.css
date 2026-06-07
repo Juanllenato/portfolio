@@ -1,0 +1,58 @@
+/* Window-scroll based stack — no nested scroll container (no scroll trap). */
+.scroll-stack-scroller {
+  position: relative;
+  width: 100%;
+}
+
+.scroll-stack-inner {
+  padding: 10vh 1.5rem 24rem;
+}
+
+.scroll-stack-card {
+  transform-origin: top center;
+  will-change: transform, filter;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  position: relative;
+  overflow: hidden;
+  height: 22rem;
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2.5rem 3rem;
+  border-radius: 28px;
+  box-sizing: border-box;
+  background:
+    linear-gradient(155deg, #1a1626 0%, #100e16 55%, #0c0a12 100%);
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.55),
+    0 0 60px rgba(124, 58, 237, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* soft violet corner glow */
+.scroll-stack-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(130% 90% at 0% 0%, rgba(124, 58, 237, 0.22), transparent 55%),
+    radial-gradient(120% 90% at 100% 100%, rgba(34, 211, 238, 0.10), transparent 55%);
+  pointer-events: none;
+}
+
+.scroll-stack-end {
+  width: 100%;
+  height: 1px;
+}
+
+@media (max-width: 640px) {
+  .scroll-stack-card {
+    height: 24rem;
+    padding: 2rem 1.5rem;
+    border-radius: 22px;
+  }
+}

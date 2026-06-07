@@ -47,7 +47,7 @@ export default function Spotlight() {
       className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-500"
       style={{
         background:
-          "radial-gradient(420px circle at var(--x, 50%) var(--y, 30%), rgba(124,58,237,0.18), transparent 70%)",
+          "radial-gradient(440px circle at var(--x, 50%) var(--y, 30%), rgba(139,92,246,0.16), transparent 70%)",
       }}
     />
   );
