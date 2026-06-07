@@ -85,8 +85,8 @@ function escapeHtml(s: string): string {
 }
 
 async function sendEmail(args: { name: string; email: string; message: string }) {
-  const key = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_EMAIL;
+  const key = process.env.RESEND_API_KEY?.trim();
+  const to = process.env.CONTACT_EMAIL?.trim();
   if (!key || !to) {
     return { ok: false, note: "Email not configured; ask the visitor to reach Juan on LinkedIn." };
   }
@@ -100,7 +100,7 @@ async function sendEmail(args: { name: string; email: string; message: string })
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM || "Portfolio <onboarding@resend.dev>",
+        from: process.env.RESEND_FROM?.trim() || "Portfolio <onboarding@resend.dev>",
         to: [to],
         reply_to: email,
         subject: `New portfolio lead: ${escapeHtml(name)}`,
@@ -140,7 +140,7 @@ function isSameOrigin(req: NextRequest): boolean {
 
 function bookACall() {
   const link =
-    process.env.CALENDLY_URL || "https://www.linkedin.com/in/juan-perez-ai-engineer";
+    process.env.CALENDLY_URL?.trim() || "https://www.linkedin.com/in/juan-perez-ai-engineer";
   return { link, note: "Share this link so the visitor can reach out / book a call." };
 }
 
@@ -213,7 +213,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Payload too large" }, { status: 413 });
   }
 
-  const key = process.env.GROQ_API_KEY;
+  const key = process.env.GROQ_API_KEY?.trim();
 
   // Graceful fallback if no key configured
   if (!key) {
