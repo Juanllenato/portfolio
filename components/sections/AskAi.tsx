@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactElement } from "react";
+import { createPortal } from "react-dom";
 import DecryptedText from "@/components/effects/DecryptedText";
 import Ferrofluid from "@/components/effects/Ferrofluid";
 import { renderGate } from "@/components/effects/renderGate";
@@ -192,7 +193,7 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
         <DecryptedText text="Ask my AI" animateOn="view" startDelay={startDelay} speed={28} maxIterations={10} />
       </button>
 
-      {open && (
+      {open && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
           {/* Ferrofluid background */}
           <div className="absolute inset-0 bg-[#06040a]" onClick={() => setOpen(false)} aria-hidden>
@@ -296,7 +297,8 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
