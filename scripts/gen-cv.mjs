@@ -1,5 +1,5 @@
 // Generates a clean, ATS-friendly one-page CV PDF into public/.
-// Run: node scripts/gen-cv.mjs
+// ATS-safe: single column, no tables, no graphics, no photo. Run: node scripts/gen-cv.mjs
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
@@ -7,68 +7,75 @@ import path from "path";
 const OUT = path.join(process.cwd(), "public", "Juan_Perez_AI_Engineer_CV.pdf");
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
-const doc = new PDFDocument({ size: "A4", margin: 48 });
+const doc = new PDFDocument({ size: "A4", margin: 46 });
 doc.pipe(fs.createWriteStream(OUT));
 
-const VIOLET = "#7c3aed";
+const VIOLET = "#6d28d9";
 const DARK = "#111114";
 const GRAY = "#555555";
-const W = doc.page.width - 96;
+const W = doc.page.width - 92;
 
 function heading(t) {
-  doc.moveDown(0.6);
-  doc.fillColor(VIOLET).font("Helvetica-Bold").fontSize(11).text(t.toUpperCase(), { characterSpacing: 1 });
+  doc.moveDown(0.5);
+  doc.fillColor(VIOLET).font("Helvetica-Bold").fontSize(10.5).text(t.toUpperCase(), { characterSpacing: 1 });
   const y = doc.y + 2;
-  doc.moveTo(48, y).lineTo(48 + W, y).strokeColor("#dddddd").lineWidth(1).stroke();
-  doc.moveDown(0.4);
+  doc.moveTo(46, y).lineTo(46 + W, y).strokeColor("#dddddd").lineWidth(1).stroke();
+  doc.moveDown(0.35);
 }
-function body(t, opts = {}) {
-  doc.fillColor(DARK).font("Helvetica").fontSize(9.5).text(t, opts);
+function body(t) {
+  doc.fillColor(DARK).font("Helvetica").fontSize(9).text(t, { lineGap: 1 });
 }
 function bullet(t) {
-  doc.fillColor(DARK).font("Helvetica").fontSize(9.5).text("•  " + t, { indent: 2, paragraphGap: 2 });
+  doc.fillColor(DARK).font("Helvetica").fontSize(9).text("•  " + t, { indent: 2, paragraphGap: 2.5, lineGap: 1 });
 }
 
 // Header
-doc.fillColor(DARK).font("Helvetica-Bold").fontSize(24).text("Juan Perez");
-doc.fillColor(VIOLET).font("Helvetica-Bold").fontSize(12).text("AI-First Software Engineer");
-doc.moveDown(0.2);
-doc.fillColor(GRAY).font("Helvetica").fontSize(9).text(
-  "Remote (LatAm) · juans.perezc@gmail.com · github.com/Juanllenato · linkedin.com/in/juan-perez-ai-engineer · crm.prevensalud.pe"
+doc.fillColor(DARK).font("Helvetica-Bold").fontSize(22).text("Juan Perez");
+doc.fillColor(VIOLET).font("Helvetica-Bold").fontSize(11).text("AI-First Software Engineer");
+doc.moveDown(0.15);
+doc.fillColor(GRAY).font("Helvetica").fontSize(8.5).text(
+  "Remote (Colombia & Peru) · juans.perezc@gmail.com · github.com/Juanllenato · linkedin.com/in/juan-perez-ai-engineer · juan-perez-ai.vercel.app"
 );
 
-heading("Summary");
+heading("Professional Summary");
 body(
-  "Applied AI Engineer who ships production AI systems — not demos. 5+ years building software and automations, with multiple AI platforms running in production for real companies across Colombia & Peru. Strong in LLM application development (RAG, agentic tool-calling), document AI (OCR), Python/FastAPI backends and multi-tenant architecture."
+  "Applied AI Engineer with 5+ years building and shipping production software, now specialized in AI-first systems. I design and deploy LLM applications, RAG pipelines, agentic AI workflows, OCR/document automation and backend integrations that run real businesses — currently in production for multiple companies across Colombia & Peru. Execution-focused, full-stack and startup-ready: I take products from data model to deployment."
 );
 
 heading("Experience");
 doc.fillColor(DARK).font("Helvetica-Bold").fontSize(10).text("AI-First Software Engineer — AINEATECH", { continued: true });
-doc.font("Helvetica").fillColor(GRAY).fontSize(9).text("   Remote · 2023–Present");
-doc.moveDown(0.2);
-bullet("Built a multi-tenant AI CRM (crm.prevensalud.pe): contextual LLM assistant (RAG, PII-free), OCR-over-WhatsApp invoice pipeline, automated PDF reporting and Celery automation. PostgreSQL row-level security.");
-bullet("Built an agentic mobile health app whose AI coach operates the whole product via chat, orchestrating 13 tools (RAG over pgvector, vision meal logging, health projection).");
-bullet("Built enterprise n8n automations with AI decisioning: support triage, lead scoring, invoice approval with fraud checks and human-in-the-loop.");
-bullet("Implemented an LLM evaluation & observability harness (versioned datasets, metrics, LLM-as-judge, CI gating).");
-bullet("Delivered production web & e-commerce platforms (prevensalud.pe, grupoalianzavital.com, pontebela.com.co).");
+doc.font("Helvetica").fillColor(GRAY).fontSize(8.5).text("    2023–Present · Remote");
+doc.moveDown(0.15);
+bullet("Architected and shipped a multi-tenant AI CRM to production: contextual LLM assistant (RAG, PII-free) for natural-language queries, OCR-over-WhatsApp pipeline that eliminated manual invoice entry, and automated nightly PDF reporting — isolated per company with PostgreSQL row-level security.");
+bullet("Engineered an agentic mobile AI coach that operates an entire app through conversation, orchestrating 13 tools (RAG over pgvector, vision logging, predictive projection) via an LLM tool-calling loop.");
+bullet("Designed enterprise automation workflows (n8n) with AI decisioning, validation and human-in-the-loop approval across support, sales and finance — replacing manual operations end to end.");
+bullet("Built an LLM evaluation & observability harness (versioned datasets, metrics, LLM-as-judge, CI gating) to catch quality regressions before release.");
+bullet("Integrated LLM, OCR, email, messaging and payment APIs; deployed containerized services with Docker and CI/CD; hardened endpoints (rate limiting, input validation, security headers).");
+bullet("Delivered 4+ production web/e-commerce platforms and produced AI-generated brand creatives (Gemini / Nano Banana).");
 
 heading("Technical Skills");
-body("AI/LLM: LLMs (Claude/GPT) · RAG · Agentic AI / tool calling (LangChain/LangGraph) · Prompt engineering · LLM evaluation · OCR / Document AI · Vector DBs (pgvector) · Embeddings");
-body("Backend: Python · FastAPI (async) · REST APIs · PostgreSQL · Redis · Multi-tenant (RLS) · JWT/RBAC · Celery");
-body("Frontend/Mobile: React · Next.js · React Native · TypeScript · Tailwind");
-body("DevOps: Docker · CI/CD (GitHub Actions) · nginx · Linux/VPS");
-body("Languages: Spanish (native) · English (B1–B2, improving)");
+body("AI/LLM: LLMs (OpenAI/Claude/Llama), RAG, AI agents, agentic workflows, LangChain, LangGraph, tool calling, prompt engineering, LLM evaluation, OCR/Document AI, vector databases, pgvector, embeddings.");
+body("Backend: Python, FastAPI, REST APIs, async, PostgreSQL, Redis, multi-tenant (RLS), JWT/RBAC, Celery.");
+body("Automation & Integrations: n8n, workflow orchestration, API integrations, webhooks.");
+body("Frontend/Mobile: React, Next.js, React Native, TypeScript, Tailwind.");
+body("DevOps: Docker, CI/CD (GitHub Actions), cloud deployment (Vercel), nginx, Linux/VPS.");
+body("Languages: Spanish (native), English (B1–B2, improving).");
 
-heading("Projects");
-bullet("PrevenSalud AI CRM — github.com/Juanllenato/prevensalud-ai-crm");
-bullet("Agentic AI Health App — github.com/Juanllenato/plataforma-bienestar-ai");
-bullet("Enterprise AI Automations (n8n) — github.com/Juanllenato/n8n-workflows");
-bullet("LLM Eval & Observability Harness — github.com/Juanllenato/llm-eval-harness");
+heading("Selected Projects");
+bullet("PrevenSalud AI CRM — production AI CRM (LLM assistant, OCR, reporting). github.com/Juanllenato/prevensalud-ai-crm");
+bullet("Agentic AI Health App — 13-tool agent orchestration (RAG, vision). github.com/Juanllenato/plataforma-bienestar-ai");
+bullet("Enterprise AI Automations (n8n) — decisioning + human-in-the-loop. github.com/Juanllenato/n8n-workflows");
+bullet("LLM Eval & Observability Harness — metrics, LLM-as-judge, CI gating. github.com/Juanllenato/llm-eval-harness");
 
 heading("Education");
 body("Unidades Tecnológicas de Santander (UTS), Colombia");
 bullet("Systems Engineering — in progress");
 bullet("Technologist in Software Systems Development — completed");
+
+heading("Keywords");
+doc.fillColor(GRAY).font("Helvetica").fontSize(8).text(
+  "AI Engineer, Applied AI Engineer, Agentic AI Engineer, AI Automation Engineer, AI Integrations Engineer, Full-Stack AI Engineer, LLM, RAG, AI Agents, Tool Calling, LangChain, LangGraph, Prompt Engineering, Vector Databases, OCR, Document AI, Python, FastAPI, PostgreSQL, n8n, Workflow Orchestration, Automation, API Integration, Next.js, React, Docker, CI/CD, Cloud Deployment, Production AI, GenAI."
+);
 
 doc.end();
 console.log("CV written to", OUT);
