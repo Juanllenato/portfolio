@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import DecryptedText from "@/components/effects/DecryptedText";
 import Ferrofluid from "@/components/effects/Ferrofluid";
 import { renderGate } from "@/components/effects/renderGate";
+import { useT } from "@/lib/i18n";
 
 type Msg = { role: "user" | "ai"; text: string };
 
@@ -45,19 +46,71 @@ function renderText(text: string) {
   return nodes;
 }
 
-const SUGGESTIONS = [
-  "What does Juan build?",
-  "Are these real production systems?",
-  "What's his tech stack?",
-  "Is he available to hire?",
-  "Leave him a message",
-  "Book a call",
-];
+const LINKEDIN_URL = "https://www.linkedin.com/in/juan-perez-ai-engineer";
+
+// Detect a contact/scheduling link in an AI reply and turn it into a CTA button.
+// Returns the button config + the message text with that bare URL removed.
+function extractCta(
+  text: string,
+  lang: "en" | "es"
+): { href: string; label: string; text: string } | null {
+  const calMatch = text.match(/https?:\/\/[^\s)]*calendly[^\s)]*/i);
+  const liMatch = text.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[^\s).,]*/i);
+  if (calMatch) {
+    return {
+      href: calMatch[0],
+      label: lang === "es" ? "Agendar una llamada" : "Book a call",
+      text: text.replace(calMatch[0], "").replace(/\s{2,}/g, " ").trim(),
+    };
+  }
+  if (liMatch) {
+    const href = liMatch[0].startsWith("http") ? liMatch[0] : `https://${liMatch[0]}`;
+    return {
+      href,
+      label: lang === "es" ? "Hablar con Juan en LinkedIn" : "Chat with Juan on LinkedIn",
+      // remove the bare URL (and a trailing "aquí:"/"here:" style lead-in) for a clean bubble
+      text: text.replace(liMatch[0], "").replace(/\s{2,}/g, " ").replace(/[:\-–]\s*$/, "").trim(),
+    };
+  }
+  return null;
+}
+
+function CtaButton({ href, label }: { href: string; label: string }) {
+  const isLinkedIn = href.includes("linkedin.com");
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-2.5 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white shadow-[0_0_24px_rgba(139,92,246,0.35)] transition hover:bg-accent-light"
+    >
+      {isLinkedIn ? (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden>
+          <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <path d="M16 2v4M8 2v4M3 10h18" />
+        </svg>
+      )}
+      {label}
+      <span aria-hidden>→</span>
+    </a>
+  );
+}
 
 // Offline fallback (used only if the API is unreachable)
-function fallbackAnswer(input: string): string {
+function fallbackAnswer(input: string, lang: "en" | "es"): string {
   const q = input.toLowerCase();
   const has = (...k: string[]) => k.some((w) => q.includes(w));
+  if (lang === "es") {
+    if (has("constru", "hace", "build")) return "Juan construye software AI-first de producción — asistentes LLM, RAG, apps agénticas, pipelines de OCR, automatización, backends y móvil. Desde la capa de IA hasta el despliegue.";
+    if (has("stack", "tecno")) return "Python · FastAPI · PostgreSQL/pgvector · APIs LLM · RAG · tool-calling agéntico · OCR · n8n · React/Next.js · React Native · Docker.";
+    if (has("dispon", "contrat", "remoto", "trabajo")) return "Sí — disponible para roles remotos de Ingeniero de IA (tiempo completo, contrato, freelance). Zona horaria LatAm, se solapa con EE. UU.";
+    if (has("contact", "correo", "mensaje", "linkedin", "llama")) return "Contacta a Juan en LinkedIn: linkedin.com/in/juan-perez-ai-engineer o GitHub: github.com/Juanllenato.";
+    return "Pregúntame sobre los proyectos, el stack, la experiencia o la disponibilidad de Juan. (Modo demo — conecta una API key para la IA completa.)";
+  }
   if (has("build", "do", "make")) return "Juan builds production AI-first software — LLM assistants, RAG, agentic apps, OCR pipelines, automation, backends and mobile. From the AI layer to deployment.";
   if (has("stack", "tech")) return "Python · FastAPI · PostgreSQL/pgvector · LLM APIs · RAG · agentic tool-calling · OCR · n8n · React/Next.js · React Native · Docker.";
   if (has("available", "hire", "remote", "job")) return "Yes — open to remote AI Engineer roles (full-time, contract, freelance). LatAm time zone, overlaps with US hours.";
@@ -66,9 +119,10 @@ function fallbackAnswer(input: string): string {
 }
 
 export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
+  const { t, lang } = useT();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "ai", text: "Hi — I'm Juan's AI assistant. Ask me anything about his work, skills or experience, or leave him a message and I'll send it over." },
+    { role: "ai", text: t.chat.greeting },
   ]);
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
@@ -82,20 +136,41 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
     if (open) endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open, loading]);
 
+  // keep the greeting in sync with the active language (only on a fresh chat)
+  useEffect(() => {
+    setMessages((m) =>
+      m.length === 1 && m[0].role === "ai" ? [{ role: "ai", text: t.chat.greeting }] : m
+    );
+  }, [t.chat.greeting]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // lock background scroll + pause the hero WebGL while the chat is open
+  // lock background scroll + pause the hero WebGL while the chat is open.
+  // Uses position:fixed (the only reliable lock on iOS Safari) and restores
+  // the exact scroll position on close.
   useEffect(() => {
     if (open) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
+      const scrollY = window.scrollY;
+      const body = document.body;
+      body.style.position = "fixed";
+      body.style.top = `-${scrollY}px`;
+      body.style.left = "0";
+      body.style.right = "0";
+      body.style.width = "100%";
+      body.style.overflow = "hidden";
       renderGate.heroPaused = true;
       return () => {
-        document.body.style.overflow = prev;
+        body.style.position = "";
+        body.style.top = "";
+        body.style.left = "";
+        body.style.right = "";
+        body.style.width = "";
+        body.style.overflow = "";
+        window.scrollTo(0, scrollY);
         renderGate.heroPaused = false;
       };
     }
@@ -105,7 +180,7 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
     if (!voiceOn || typeof window === "undefined" || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-US";
+    u.lang = lang === "es" ? "es-ES" : "en-US";
     u.rate = 1.05;
     window.speechSynthesis.speak(u);
   };
@@ -140,16 +215,16 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: payload }),
+        body: JSON.stringify({ messages: payload, lang }),
       });
       const data = await res.json();
-      const reply: string = data.reply || fallbackAnswer(t);
+      const reply: string = data.reply || fallbackAnswer(t, lang);
       setLoading(false);
       typewriter(reply);
       speak(reply);
     } catch {
       setLoading(false);
-      const reply = fallbackAnswer(t);
+      const reply = fallbackAnswer(t, lang);
       typewriter(reply);
       speak(reply);
     }
@@ -164,11 +239,11 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) {
-      alert("Voice input isn't supported in this browser. Try Chrome.");
+      alert(t.chat.voiceUnsupported);
       return;
     }
     const rec = new SR();
-    rec.lang = "en-US";
+    rec.lang = lang === "es" ? "es-ES" : "en-US";
     rec.interimResults = false;
     rec.maxAlternatives = 1;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -190,7 +265,7 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light hover:shadow-[0_0_30px_var(--glow)]"
       >
-        <DecryptedText text="Ask my AI" animateOn="view" startDelay={startDelay} speed={28} maxIterations={10} />
+        <DecryptedText key={`askai-${lang}`} text={t.hero.askAi} animateOn="view" startDelay={startDelay} speed={28} maxIterations={10} />
       </button>
 
       {open && typeof document !== "undefined" && createPortal(
@@ -202,13 +277,13 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
           </div>
 
           {/* liquid glass chat panel */}
-          <div className="relative z-10 flex h-[88vh] w-full flex-col overflow-hidden rounded-t-3xl border border-white/15 bg-[#0b0814]/45 shadow-[0_30px_120px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:h-[640px] sm:max-w-lg sm:rounded-3xl">
+          <div className="relative z-10 flex h-[88dvh] max-h-[88dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-white/15 bg-[#0b0814]/45 shadow-[0_30px_120px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:h-[640px] sm:max-h-[640px] sm:max-w-lg sm:rounded-3xl">
             {/* header */}
             <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 font-mono text-xs font-bold tracking-wider text-accent-light backdrop-blur">AI</span>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-white">Juan&rsquo;s AI Assistant</p>
-                <p className="font-mono text-[11px] text-white/60">agentic · voice · can email Juan</p>
+                <p className="text-sm font-semibold text-white">{t.chat.title}</p>
+                <p className="font-mono text-[11px] text-white/60">{t.chat.subtitle}</p>
               </div>
               <button
                 onClick={() => {
@@ -240,14 +315,20 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
             </div>
 
             {/* messages */}
-            <div className="scrollbar-slim flex-1 space-y-4 overflow-y-auto px-5 py-4">
-              {messages.map((m, i) => (
-                <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed backdrop-blur-md ${m.role === "user" ? "bg-accent/85 text-white" : "border border-white/15 bg-white/10 text-white"}`}>
-                    {m.role === "ai" ? renderText(m.text) : m.text}
+            <div className="scrollbar-slim flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-4" style={{ WebkitOverflowScrolling: "touch" }}>
+              {messages.map((m, i) => {
+                const cta = m.role === "ai" ? extractCta(m.text, lang) : null;
+                return (
+                  <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`flex max-w-[85%] flex-col items-start rounded-2xl px-4 py-2.5 text-sm leading-relaxed backdrop-blur-md ${m.role === "user" ? "bg-accent/85 text-white" : "border border-white/15 bg-white/10 text-white"}`}>
+                      <span className="whitespace-pre-wrap">
+                        {m.role === "ai" ? renderText(cta ? cta.text : m.text) : m.text}
+                      </span>
+                      {cta && <CtaButton href={cta.href} label={cta.label} />}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {loading && (
                 <div className="flex justify-start">
                   <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white backdrop-blur-md">
@@ -264,7 +345,7 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
 
             {/* suggestions */}
             <div className="flex flex-wrap gap-2 border-t border-white/10 px-5 py-3">
-              {SUGGESTIONS.map((s) => (
+              {t.chat.suggestions.map((s) => (
                 <button key={s} onClick={() => send(s)} className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-mono text-xs text-white/80 backdrop-blur transition hover:border-accent-light hover:text-white">
                   {s}
                 </button>
@@ -289,11 +370,11 @@ export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
               <input
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                placeholder={listening ? "Listening…" : "Ask anything about Juan…"}
-                className="flex-1 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white outline-none backdrop-blur placeholder:text-white/50 focus:border-accent-light"
+                placeholder={listening ? t.chat.listening : t.chat.placeholder}
+                className="min-w-0 flex-1 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 text-base text-white outline-none backdrop-blur placeholder:text-white/50 focus:border-accent-light sm:text-sm"
               />
-              <button type="submit" disabled={loading} className="rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-50">
-                Send
+              <button type="submit" disabled={loading} className="shrink-0 rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light disabled:opacity-50">
+                {t.chat.send}
               </button>
             </form>
           </div>

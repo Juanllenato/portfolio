@@ -1,35 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/lib/i18n";
 
 type QA = { q: string; a: string };
-
-const FAQS: QA[] = [
-  {
-    q: "What do you build?",
-    a: "Production AI-first software end to end — LLM assistants, RAG systems, agentic apps, OCR/document pipelines, intelligent automation, backends and full-stack/mobile products. From the AI layer to deployment.",
-  },
-  {
-    q: "Are these real production systems?",
-    a: "Yes. Everything in this portfolio runs in production for real companies across Colombia & Peru — not demos or course projects. You can open the live sites and the engineering case studies on GitHub.",
-  },
-  {
-    q: "Are you available for remote work?",
-    a: "Yes — I work fully remote and I'm in a LatAm time zone that overlaps comfortably with US hours. Open to full-time, contract and freelance.",
-  },
-  {
-    q: "What's your core stack?",
-    a: "Python · FastAPI · PostgreSQL/pgvector · LLM APIs (Claude/GPT) · RAG · agentic tool-calling (LangChain/LangGraph) · OCR · n8n · React/Next.js · React Native · Docker.",
-  },
-  {
-    q: "How do you ensure AI quality?",
-    a: "I'm eval-first: I measure AI features with versioned test sets, metrics and LLM-as-judge, and gate changes in CI so quality never silently regresses. (See my llm-eval-harness on GitHub.)",
-  },
-  {
-    q: "How do we start working together?",
-    a: "Reach out on LinkedIn or by email — tell me what you're building and what you need. I'll get back to you quickly to scope it out.",
-  },
-];
 
 function FaqItem({ item, index }: { item: QA; index: number }) {
   const [open, setOpen] = useState(false);
@@ -71,6 +45,8 @@ function FaqItem({ item, index }: { item: QA; index: number }) {
 }
 
 export default function Faq() {
+  const { t } = useT();
+  const FAQS = t.faq.items;
   return (
     <section id="faq" className="relative z-10 px-4 pt-16 sm:px-6">
       {/* shape divider: rounded-top panel with a strong "light hitting" glow */}
@@ -87,12 +63,12 @@ export default function Faq() {
 
         <div className="relative z-10 mx-auto max-w-3xl px-6 pb-24 pt-28 sm:pt-36">
           <div className="mb-12 text-center">
-            <span className="mono-label text-white/85">SECTION_05 // FAQ</span>
+            <span className="mono-label text-white/85">{t.faq.label}</span>
             <h2 className="mt-4 text-4xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)] sm:text-5xl">
-              Frequently asked
+              {t.faq.title}
             </h2>
             <p className="mx-auto mt-3 max-w-md text-white/80">
-              Quick answers for recruiters, founders and teams.
+              {t.faq.blurb}
             </p>
           </div>
 

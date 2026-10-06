@@ -1,6 +1,7 @@
 "use client";
 
 import ScrollStack, { ScrollStackItem } from "@/components/effects/ScrollStack";
+import { useT } from "@/lib/i18n";
 
 type SkillCard = {
   index: string;
@@ -80,22 +81,22 @@ const CARDS: SkillCard[] = [
 ];
 
 export default function SkillsStack() {
+  const { t } = useT();
   return (
     <section id="skills" className="relative z-10 bg-background">
       {/* heading */}
       <div className="mx-auto max-w-6xl px-6 pt-24 text-center">
-        <span className="mono-label">SECTION_04 // CAPABILITIES</span>
+        <span className="mono-label">{t.skills.label}</span>
         <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Technical skills &amp; knowledge
+          {t.skills.title}
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-dim">
-          Scroll through what I work with — from AI systems to backends,
-          frontend, automation and beyond.
+          {t.skills.blurb}
         </p>
       </div>
 
       <ScrollStack itemDistance={80} itemStackDistance={28} baseScale={0.86}>
-        {CARDS.map((c) => (
+        {CARDS.map((c, i) => (
           <ScrollStackItem key={c.index}>
             <div className="relative z-10 flex h-full flex-col">
               <div className="flex items-baseline gap-4">
@@ -104,9 +105,9 @@ export default function SkillsStack() {
                 </span>
                 <div>
                   <h3 className="text-2xl font-bold text-white sm:text-3xl">
-                    {c.title}
+                    {t.skills.cards[i]?.title ?? c.title}
                   </h3>
-                  <p className="mt-1 text-sm text-dim">{c.blurb}</p>
+                  <p className="mt-1 text-sm text-dim">{t.skills.cards[i]?.blurb ?? c.blurb}</p>
                 </div>
               </div>
 

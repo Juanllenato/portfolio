@@ -1,41 +1,21 @@
+"use client";
+
 import ScrambleCard from "@/components/effects/ScrambleCard";
+import { useT } from "@/lib/i18n";
 
 type Company = {
   name: string;
-  sector: string;
+  sectorKey: "prevensalud" | "alianza" | "ainea" | "pontebela" | "vida";
   logo: string;
   url?: string;
 };
 
 const COMPANIES: Company[] = [
-  {
-    name: "PrevenSalud",
-    sector: "Healthcare · AI CRM",
-    logo: "/logos/prevensalud.png",
-    url: "https://prevensalud.pe",
-  },
-  {
-    name: "Grupo Alianza Vital",
-    sector: "Healthcare · Platform",
-    logo: "/logos/alianza-vital.png",
-    url: "https://grupoalianzavital.com",
-  },
-  {
-    name: "AINEA Technology",
-    sector: "Software & AI studio",
-    logo: "/logos/aineatechnology.png",
-  },
-  {
-    name: "Pontebela",
-    sector: "E-commerce · Supplements",
-    logo: "/logos/pontebela.png",
-    url: "https://pontebela.com.co",
-  },
-  {
-    name: "Vida Total Plus",
-    sector: "Health & wellness",
-    logo: "/logos/vida-total-plus.png",
-  },
+  { name: "PrevenSalud", sectorKey: "prevensalud", logo: "/logos/prevensalud.png", url: "https://prevensalud.pe" },
+  { name: "Grupo Alianza Vital", sectorKey: "alianza", logo: "/logos/alianza-vital.png", url: "https://grupoalianzavital.com" },
+  { name: "AINEA Technology", sectorKey: "ainea", logo: "/logos/aineatechnology.png" },
+  { name: "Pontebela", sectorKey: "pontebela", logo: "/logos/pontebela.png", url: "https://pontebela.com.co" },
+  { name: "Vida Total Plus", sectorKey: "vida", logo: "/logos/vida-total-plus.png" },
 ];
 
 /** + marks centered on each corner → align across the grid for symmetry. */
@@ -53,16 +33,16 @@ function Crosshairs() {
 }
 
 export default function TrustedBy() {
+  const { t } = useT();
   return (
     <section id="trusted" className="relative z-10 mx-auto max-w-6xl px-6 py-24">
       <div className="mb-14 text-center">
-        <span className="mono-label">SECTION_03 // TRUSTED BY</span>
+        <span className="mono-label">{t.trusted.label}</span>
         <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Companies that trusted my work
+          {t.trusted.title}
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-dim">
-          Real businesses across Colombia &amp; Peru running software I designed,
-          built and deployed.
+          {t.trusted.blurb}
         </p>
       </div>
 
@@ -71,14 +51,14 @@ export default function TrustedBy() {
         {COMPANIES.map((c) => (
           <div key={c.name} className="relative border-b border-r border-border">
             <Crosshairs />
-            <ScrambleCard logo={c.logo} name={c.name} sector={c.sector} url={c.url} />
+            <ScrambleCard logo={c.logo} name={c.name} sector={t.trusted.sectors[c.sectorKey]} url={c.url} />
           </div>
         ))}
         {/* filler keeps the grid complete (5 + 1 = 6) */}
         <div className="relative hidden border-b border-r border-border sm:block">
           <Crosshairs />
           <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-xs text-dim/30">
-            // and counting
+            {t.trusted.counting}
           </span>
         </div>
       </div>

@@ -7,19 +7,35 @@ const MODEL = "llama-3.3-70b-versatile";
 
 const SYSTEM_PROMPT = `You are the AI assistant for Juan Perez's portfolio. You speak on his behalf to recruiters, founders and potential clients. Be concise, friendly, confident and professional. Answer in the language the user writes in (English or Spanish).
 
+SPANISH STYLE (when replying in Spanish):
+- Write in natural, warm, professional Latin-American Spanish — NEVER a literal/robotic translation from English.
+- Forbidden robotic phrases: "enlace de programación", "programar una llamada" (use "agendar una llamada"), "su perfil de LinkedIn" repeated mechanically. Sound like a real person who works with Juan.
+- Be human and inviting, not stiff. Short sentences. No filler like "¿Necesitas ayuda con algo más sobre Juan o sus proyectos?" on every message.
+
+CONTACT & SCHEDULING:
+- When the visitor wants to talk to Juan, hire him, or schedule/book a call, call book_a_call, then invite them warmly and ALWAYS paste the full link verbatim (https://www.linkedin.com/in/juan-perez-ai-engineer) in your reply — the UI renders it as a professional button, so the link must appear as plain text in your message.
+- Example (Spanish): "¡Claro! La forma más rápida de hablar directamente con Juan es por LinkedIn. Escríbele por aquí: https://www.linkedin.com/in/juan-perez-ai-engineer"
+
 ABOUT JUAN:
-- Role: AI-First Software Engineer. He builds production AI systems end to end — not demos.
-- Experience: 5+ years building software and automations. Multiple systems shipped to production for real companies across Colombia & Peru (PrevenSalud, Grupo Alianza Vital, Pontebela, Vida Total Plus).
-- Flagship projects:
-  • PrevenSalud AI CRM (crm.prevensalud.pe): contextual LLM assistant (RAG, PII-free), OCR-over-WhatsApp invoice pipeline, automated PDF reporting, Celery automation. Multi-tenant (PostgreSQL RLS).
+- Role: Senior AI Engineer. He builds production AI systems end to end — not demos.
+- Experience: 5+ years building software and 3+ years shipping LLM systems to production. Senior AI Engineer (Lead, AI Products) working remotely for AINEATECH, a US-based software company in Houston, TX, where he designed and built 7 AI products for businesses in Colombia & Peru. Client work also includes PrevenSalud, Grupo Alianza Vital, Pontebela and Vida Total Plus.
+- Social proof: verifiable client references (e.g. Grupo Alianza Vital, Pontebela) publicly vouch for his work — testimonials are on the portfolio.
+- How he builds agents: custom tool-use loops with strict-schema tools, deterministic output guards (no data leaks, every price grounded in the catalog, the agent never confirms an order unless the tool succeeded), human handoff, Postgres row-level security for multi-tenancy, eval suites with simulated customers + LLM-as-judge, cost-aware routing between Claude and open-weight models (DeepSeek, Kimi, GLM via Together AI). 1,500+ automated tests and 75+ eval scenarios across products.
+- AI products (be precise about status — pilots are pilots, not live with customers):
+  • Sin Frontera (sinfrontera.aineatech.com): WhatsApp AI sales agent for a B2B industrial real-estate firm in Colombia (~100 properties, 1,200–1,500 leads/month) that qualifies leads and books site visits. Hybrid search (SQL + Spanish full-text + pgvector embeddings with RRF), 11 agent tools + a 12-tool internal assistant for the team, 43 eval scenarios. Status: supervised shadow-mode pilot.
+  • Ainea (app.aineatech.com): multi-tenant WhatsApp AI sales agent SaaS for LatAm SMBs — Meta ad → WhatsApp chat → AI agent → store order → Conversions API purchase. Embedded Signup, WhatsApp Coexistence, Shopify, Stripe Billing. Status: deployed.
+  • Ainea CRM (app.aineatech.com): CRM for the sales team — leads with round-robin routing, Google Meet scheduling, email follow-ups, metrics, commissions; n8n executes via an HMAC-signed outbox. Status: live.
+  • Ainea Autos (autos.aineatech.com): AI platform for used-car dealerships in Colombia & Peru — 24/7 WhatsApp buyer agent (inventory, financing calculator, trade-in, test drives), web CRM, 27-tool assistant for owners and salespeople. Built on the same agent architecture in 2 days. Status: deployed.
+  • Restaurant AI agent for BACCA (3 locations, Bucaramanga, Colombia): WhatsApp orders and table reservations on Claude, 13 tools, deterministic price guards, seat-capacity booking, voice notes. Status: preparing supervised pilot.
+  • PrevenSalud AI CRM (crm.prevensalud.pe): production AI CRM with 120+ active users — contextual LLM assistant (RAG, PII-free), OCR-over-WhatsApp invoice pipeline, automated PDF reporting, Celery automation. Multi-tenant (PostgreSQL RLS).
   • Agentic mobile health app: an AI coach that operates the whole app via chat, orchestrating 13 tools (RAG over pgvector, vision meal logging, health projection). LangGraph-portable.
   • Enterprise n8n automations: AI support triage, lead BANT scoring, invoice approval with fraud checks + human-in-the-loop.
   • LLM eval & observability harness: versioned datasets, metrics, LLM-as-judge, CI gating.
-- Stack: Python, FastAPI, PostgreSQL/pgvector, Redis, LLM APIs (Claude/GPT), RAG, agentic tool-calling (LangChain/LangGraph), OCR/Document AI, n8n, React/Next.js, React Native, Docker, CI/CD.
+- Stack: TypeScript/Node.js (Fastify, Zod, Drizzle), Python/FastAPI, PostgreSQL/Supabase/pgvector, Redis, pg-boss, LLM APIs (Claude, OpenAI, Together AI), RAG & hybrid search, agentic tool-calling (LangChain/LangGraph concepts), OCR/Document AI, speech-to-text, WhatsApp Cloud API & Meta CAPI, n8n, React/Next.js, React Native, Docker, GitHub Actions CI/CD.
 - Strengths: problem solving, ownership, self-directed, clear communication.
 - Education: Technologist in Software Systems Development (completed) + Systems Engineering in progress (UTS, Colombia).
 - Availability: open to remote AI Engineer / Applied AI / GenAI roles (full-time, contract, freelance) with international teams. LatAm time zone, overlaps with US hours.
-- English: B1–B2, improving; very comfortable with async written collaboration.
+- English: intermediate (B1), improving; very comfortable with async written collaboration.
 - Links: GitHub github.com/Juanllenato · LinkedIn linkedin.com/in/juan-perez-ai-engineer.
 
 GITHUB REPOS (public, real code & case studies):
@@ -141,7 +157,12 @@ function isSameOrigin(req: NextRequest): boolean {
 function bookACall() {
   const link =
     process.env.CALENDLY_URL?.trim() || "https://www.linkedin.com/in/juan-perez-ai-engineer";
-  return { link, note: "Share this link so the visitor can reach out / book a call." };
+  return {
+    link,
+    note:
+      "Reply warmly and invite the visitor to message Juan directly. You MUST include this exact full URL verbatim in your reply (the UI turns it into a button): " +
+      link,
+  };
 }
 
 // Strip any tool/function syntax the model may leak into plain text
@@ -181,22 +202,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // 3) Parse + validate payload
+  let messages: { role: string; content: string }[];
+  let lang: "en" | "es" = "en";
+  try {
+    const body = await req.json();
+    messages = body?.messages;
+    if (body?.lang === "es" || body?.lang === "en") lang = body.lang;
+  } catch {
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
+
   // 2) Rate limit per IP
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
   if (rateLimited(ip)) {
     return NextResponse.json(
-      { reply: "You're sending messages a bit fast — give me a moment and try again." },
+      {
+        reply:
+          lang === "es"
+            ? "Estás enviando mensajes un poco rápido — dame un momento e inténtalo de nuevo."
+            : "You're sending messages a bit fast — give me a moment and try again.",
+      },
       { status: 429 }
     );
-  }
-
-  // 3) Parse + validate payload
-  let messages: { role: string; content: string }[];
-  try {
-    const body = await req.json();
-    messages = body?.messages;
-  } catch {
-    return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
   if (!Array.isArray(messages) || messages.length === 0 || messages.length > 30) {
     return NextResponse.json({ error: "Invalid messages" }, { status: 400 });
@@ -219,11 +247,18 @@ export async function POST(req: NextRequest) {
   if (!key) {
     return NextResponse.json({
       reply:
-        "I'm running in demo mode right now. Ask me about Juan's projects, stack, experience or availability — or reach him on LinkedIn (linkedin.com/in/juan-perez-ai-engineer).",
+        lang === "es"
+          ? "Ahora mismo estoy en modo demo. Pregúntame sobre los proyectos, el stack, la experiencia o la disponibilidad de Juan — o contáctalo en LinkedIn (linkedin.com/in/juan-perez-ai-engineer)."
+          : "I'm running in demo mode right now. Ask me about Juan's projects, stack, experience or availability — or reach him on LinkedIn (linkedin.com/in/juan-perez-ai-engineer).",
     });
   }
 
-  const convo: unknown[] = [{ role: "system", content: SYSTEM_PROMPT }, ...messages];
+  const langDirective =
+    lang === "es"
+      ? "\n\nThe visitor is using the site in Spanish. Reply in natural, professional Spanish (Latin American) unless they clearly switch to another language."
+      : "\n\nThe visitor is using the site in English. Reply in English unless they clearly switch to another language.";
+
+  const convo: unknown[] = [{ role: "system", content: SYSTEM_PROMPT + langDirective }, ...messages];
 
   try {
     for (let step = 0; step < 4; step++) {
@@ -256,14 +291,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         reply:
           cleaned ||
-          "Happy to help — ask me about Juan's projects, stack or experience, or leave him a message and I'll pass it along.",
+          (lang === "es"
+            ? "Con gusto — pregúntame sobre los proyectos, el stack o la experiencia de Juan, o déjale un mensaje y se lo paso."
+            : "Happy to help — ask me about Juan's projects, stack or experience, or leave him a message and I'll pass it along."),
       });
     }
-    return NextResponse.json({ reply: "Sorry, I couldn't complete that. Try again?" });
+    return NextResponse.json({
+      reply:
+        lang === "es"
+          ? "Lo siento, no pude completar eso. ¿Intentamos de nuevo?"
+          : "Sorry, I couldn't complete that. Try again?",
+    });
   } catch {
     return NextResponse.json({
       reply:
-        "I'm having trouble reaching my brain right now. You can reach Juan on LinkedIn (linkedin.com/in/juan-perez-ai-engineer) or GitHub (github.com/Juanllenato).",
+        lang === "es"
+          ? "Estoy teniendo problemas para responder ahora mismo. Puedes contactar a Juan en LinkedIn (linkedin.com/in/juan-perez-ai-engineer) o GitHub (github.com/Juanllenato)."
+          : "I'm having trouble reaching my brain right now. You can reach Juan on LinkedIn (linkedin.com/in/juan-perez-ai-engineer) or GitHub (github.com/Juanllenato).",
     });
   }
 }

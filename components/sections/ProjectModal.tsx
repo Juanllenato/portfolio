@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 export type Project = {
   name: string;
-  url: string;
+  url?: string;
   domain: string;
   tagline: string;
   badge: string;
@@ -13,6 +13,13 @@ export type Project = {
   description: string;
   stack: string[];
   github?: string;
+  labels?: {
+    stack: string;
+    role: string;
+    openLive: string;
+    viewGithub: string;
+    open: string;
+  };
 };
 
 export default function ProjectModal({
@@ -37,6 +44,14 @@ export default function ProjectModal({
 
   if (!project) return null;
 
+  const L = project.labels ?? {
+    stack: "Stack",
+    role: "Role",
+    openLive: "Open live site ↗",
+    viewGithub: "View on GitHub",
+    open: "Open ↗",
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
@@ -60,14 +75,16 @@ export default function ProjectModal({
             {project.domain}
           </span>
           <div className="ml-auto flex items-center gap-2">
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noreferrer"
-              className="rounded-md border border-border px-3 py-1 font-mono text-xs text-foreground transition hover:border-accent-light"
-            >
-              Open ↗
-            </a>
+            {project.url && (
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-md border border-border px-3 py-1 font-mono text-xs text-foreground transition hover:border-accent-light"
+              >
+                {L.open}
+              </a>
+            )}
             <button
               onClick={onClose}
               aria-label="Close"
@@ -104,7 +121,7 @@ export default function ProjectModal({
             </p>
 
             <div className="mt-6">
-              <span className="mono-label">Stack</span>
+              <span className="mono-label">{L.stack}</span>
               <div className="mt-2 flex flex-wrap gap-2">
                 {project.stack.map((s) => (
                   <span
@@ -118,14 +135,16 @@ export default function ProjectModal({
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={project.url}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light hover:shadow-[0_0_30px_var(--glow)]"
-              >
-                Open live site ↗
-              </a>
+              {project.url && (
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-light hover:shadow-[0_0_30px_var(--glow)]"
+                >
+                  {L.openLive}
+                </a>
+              )}
               {project.github && (
                 <a
                   href={project.github}
@@ -133,7 +152,7 @@ export default function ProjectModal({
                   rel="noreferrer"
                   className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground transition hover:border-accent-light"
                 >
-                  View on GitHub
+                  {L.viewGithub}
                 </a>
               )}
             </div>

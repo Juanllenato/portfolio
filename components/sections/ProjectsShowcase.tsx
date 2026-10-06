@@ -3,61 +3,94 @@
 import { useState } from "react";
 import CardSwap, { Card } from "@/components/effects/CardSwap";
 import ProjectModal, { type Project } from "./ProjectModal";
+import { useT } from "@/lib/i18n";
 
-const PROJECTS: Project[] = [
+type ItemKey = "crm" | "sinfrontera" | "ainea" | "autos" | "bacca" | "prevensalud" | "alianza" | "pontebela";
+
+const BASE: { key: ItemKey; name: string; url?: string; domain: string; image: string; stack: string[]; github?: string }[] = [
   {
+    key: "crm",
     name: "PrevenSalud AI CRM",
     url: "https://crm.prevensalud.pe",
     domain: "crm.prevensalud.pe",
-    tagline: "Contextual LLM assistant · OCR · automated reporting",
-    badge: "Production · AI",
     image: "/projects/crm-prevensalud.png",
-    role: "Design, architecture & full-stack development",
-    description:
-      "Replaced manual finance, reporting and customer-management work with a multi-tenant AI CRM deployed in production. A contextual LLM assistant (RAG over live business data, PII-free) answers questions by conversation, an OCR-over-WhatsApp pipeline replaces manual invoice entry, and a Celery layer automates nightly PDF reporting — all isolated per company via PostgreSQL row-level security.",
     stack: ["Python", "FastAPI", "PostgreSQL (RLS)", "LLM", "RAG", "OCR", "Celery", "Docker"],
     github: "https://github.com/Juanllenato/prevensalud-ai-crm",
   },
   {
+    key: "sinfrontera",
+    name: "Sin Frontera — AI Sales Agent",
+    url: "https://sinfrontera.aineatech.com",
+    domain: "sinfrontera.aineatech.com",
+    image: "/projects/ai-sinfrontera.png",
+    stack: ["TypeScript", "Node.js", "Fastify", "React", "Supabase Postgres", "pgvector", "pg-boss", "Claude", "Together AI", "WhatsApp Cloud API"],
+  },
+  {
+    key: "ainea",
+    name: "Ainea — AI Sales Platform & CRM",
+    url: "https://app.aineatech.com",
+    domain: "app.aineatech.com",
+    image: "/projects/ai-ainea.png",
+    stack: ["TypeScript", "Fastify", "PostgreSQL (RLS)", "pgvector", "Redis", "Meta Graph API", "Shopify", "Stripe", "n8n"],
+  },
+  {
+    key: "autos",
+    name: "Ainea Autos",
+    url: "https://autos.aineatech.com",
+    domain: "autos.aineatech.com",
+    image: "/projects/ai-autos.png",
+    stack: ["TypeScript", "Fastify", "React", "PostgreSQL (RLS)", "DeepSeek", "Together AI", "WhatsApp Cloud API", "Google Sheets"],
+  },
+  {
+    key: "bacca",
+    name: "BACCA — Restaurant AI Agent",
+    domain: "WhatsApp · Bucaramanga, CO",
+    image: "/projects/ai-bacca.png",
+    stack: ["TypeScript", "Fastify", "Drizzle", "PostgreSQL (RLS)", "pg-boss", "Claude", "Deepgram", "WhatsApp Cloud API"],
+  },
+  {
+    key: "prevensalud",
     name: "PrevenSalud",
     url: "https://prevensalud.pe",
     domain: "prevensalud.pe",
-    tagline: "Healthcare platform · custom build",
-    badge: "Production",
     image: "/projects/prevensalud.png",
-    role: "Full-stack web development & deployment",
-    description:
-      "Deployed and maintained in production as the public face of a preventive-health company. Built from scratch as a custom Astra child theme with bespoke page templates (booking, treatments catalog), a design-token system, GSAP motion and a fully responsive, mobile-first layout.",
     stack: ["WordPress", "Custom Astra child theme", "PHP", "GSAP", "CSS", "Responsive"],
   },
   {
+    key: "alianza",
     name: "Grupo Alianza Vital",
     url: "https://grupoalianzavital.com",
     domain: "grupoalianzavital.com",
-    tagline: "Corporate platform · WhatsApp-first commerce",
-    badge: "Production",
     image: "/projects/alianza-vital.png",
-    role: "Design system & full-stack development",
-    description:
-      "Live corporate/commerce platform that replaces the traditional cart with a WhatsApp-first ordering flow. Built on a hand-designed “Liquid Glass” system with a section-based modular architecture (isolated PHP + CSS + JS per section) and custom WooCommerce styling.",
     stack: ["WordPress", "WooCommerce", "PHP", "Custom design system", "JavaScript", "CSS"],
     github: "https://github.com/Juanllenato/wordpress-astra-themes",
   },
   {
+    key: "pontebela",
     name: "Pontebela",
     url: "https://pontebela.com.co",
     domain: "pontebela.com.co",
-    tagline: "Shopify store · AI-generated creatives",
-    badge: "E-commerce · AI",
     image: "/projects/pontebela.png",
-    role: "Shopify build & AI creative direction",
-    description:
-      "Shopify storefront for a supplements brand, deployed and running in production with a custom catalog and sales flows. I also produced all of the brand's advertising imagery end-to-end using AI image generation (Nano Banana / Gemini), from concept to final creative.",
     stack: ["Shopify", "Liquid", "E-commerce", "AI Image Generation (Nano Banana)", "Creative Direction"],
   },
 ];
 
 export default function ProjectsShowcase() {
+  const { t } = useT();
+  const PROJECTS: Project[] = BASE.map((b) => ({
+    ...b,
+    tagline: t.projects.items[b.key].tagline,
+    badge: t.projects.items[b.key].badge,
+    role: t.projects.items[b.key].role,
+    description: t.projects.items[b.key].description,
+    labels: {
+      stack: t.projects.stackLabel,
+      role: t.projects.roleLabel,
+      openLive: t.projects.openLive,
+      viewGithub: t.projects.viewGithub,
+      open: t.projects.open,
+    },
+  }));
   const [active, setActive] = useState<Project | null>(null);
 
   return (
@@ -67,23 +100,22 @@ export default function ProjectsShowcase() {
     >
       {/* Left — copy */}
       <div className="lg:w-1/2">
-        <span className="mono-label">SECTION_01 // IN PRODUCTION</span>
+        <span className="mono-label">{t.projects.label}</span>
         <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-          Live systems,
+          {t.projects.titleA}
           <br />
-          <span className="text-accent-light">real businesses.</span>
+          <span className="text-accent-light">{t.projects.titleB}</span>
         </h2>
         <p className="mt-6 max-w-md text-dim">
-          Not demos — software running in production for real companies across
-          Colombia &amp; Peru. Click a card to open the live site.
+          {t.projects.blurb}
         </p>
         <div className="mt-8 flex flex-wrap gap-2">
-          {["AI / LLM", "RAG", "OCR", "Automation", "Full-stack"].map((t) => (
+          {t.projects.tags.map((tag) => (
             <span
-              key={t}
+              key={tag}
               className="rounded-full border border-border px-3 py-1 font-mono text-xs text-dim"
             >
-              {t}
+              {tag}
             </span>
           ))}
         </div>
@@ -124,8 +156,8 @@ export default function ProjectsShowcase() {
         <CardSwap
           width={620}
           height={440}
-          cardDistance={64}
-          verticalDistance={68}
+          cardDistance={36}
+          verticalDistance={32}
           delay={3800}
           skewAmount={5}
           pauseOnHover={false}

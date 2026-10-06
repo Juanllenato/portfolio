@@ -1,18 +1,17 @@
-import Link from "next/link";
+"use client";
 
-const links = [
-  { label: "GitHub", href: "https://github.com/Juanllenato", external: true },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/in/juan-perez-ai-engineer",
-    external: true,
-  },
-  { label: "Email", href: "mailto:juans.perezc@gmail.com", external: false },
-  { label: "CV", href: "/cv", external: false },
-  { label: "Download CV (PDF)", href: "/Juan_Perez_AI_Engineer_CV.pdf", external: true },
-];
+import Link from "next/link";
+import { useT } from "@/lib/i18n";
 
 export default function Footer() {
+  const { t } = useT();
+  const links = [
+    { label: t.footer.github, href: "https://github.com/Juanllenato", external: true },
+    { label: t.footer.linkedin, href: "https://www.linkedin.com/in/juan-perez-ai-engineer", external: true },
+    { label: t.footer.email, href: "mailto:juans.perezc@gmail.com", external: false },
+    { label: t.footer.cv, href: "/cv", external: false },
+    { label: t.footer.downloadCv, href: "/Juan_Perez_AI_Engineer_CV.pdf", external: true },
+  ];
   return (
     <footer className="border-t border-border">
       <div className="mx-auto max-w-6xl px-6 py-12">
@@ -22,7 +21,7 @@ export default function Footer() {
               Juan Perez
             </p>
             <p className="mt-1 text-sm text-dim">
-              AI-First Software Engineer · Remote
+              {t.footer.role}
             </p>
           </div>
 
@@ -60,8 +59,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="mono-label">Built with Next.js · Deployed on Vercel</p>
-          <p className="text-sm text-dim">© 2026 Juan Perez</p>
+          <p className="mono-label">{t.footer.built}</p>
+          <p className="text-sm text-dim">{t.footer.rights}</p>
         </div>
       </div>
     </footer>

@@ -1,13 +1,12 @@
-const STACK = ["Python", "FastAPI", "LLM / RAG", "Agentic AI", "React / Next.js", "Automation"];
-const STRENGTHS = ["Problem solving", "Ownership", "Self-directed", "Clear communication"];
+"use client";
 
-const STATS = [
-  { value: "5+ yrs", label: "Building software" },
-  { value: "Colombia & Peru", label: "Production deployments" },
-  { value: "UTS", label: "Systems Engineering" },
-];
+import { useT } from "@/lib/i18n";
 
 export default function AboutCTA() {
+  const { t } = useT();
+  const STACK: string[] = t.about.stack;
+  const STRENGTHS: string[] = t.about.strengths;
+  const STATS: { value: string; label: string }[] = t.about.stats;
   return (
     <section id="about" className="relative z-10 px-4 py-24 sm:px-6">
       <div
@@ -33,16 +32,14 @@ export default function AboutCTA() {
 
         {/* Content */}
         <div className="relative z-10 flex w-full flex-col items-center">
-          <span className="mono-label text-white/60">SECTION_02 // WHO I AM</span>
+          <span className="mono-label text-white/60">{t.about.label}</span>
 
           <h2 className="mt-6 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-6xl">
-            Let&rsquo;s build something real.
+            {t.about.title}
           </h2>
 
           <p className="mt-6 max-w-2xl text-balance text-base leading-relaxed text-white/70 sm:text-lg">
-            AI-First Software Engineer with 5+ years building production software
-            and automations. I&rsquo;ve shipped systems for companies across
-            Colombia &amp; Peru — AI platforms, backends and e-commerce, end to end.
+            {t.about.blurb}
           </p>
 
           {/* stats */}
@@ -65,7 +62,7 @@ export default function AboutCTA() {
           {/* skills */}
           <div className="mt-12 grid w-full max-w-3xl gap-8 sm:grid-cols-2">
             <div>
-              <span className="mono-label text-white/50">Stack</span>
+              <span className="mono-label text-white/50">{t.about.stackLabel}</span>
               <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
                 {STACK.map((s) => (
                   <span
@@ -78,7 +75,7 @@ export default function AboutCTA() {
               </div>
             </div>
             <div>
-              <span className="mono-label text-white/50">Strengths</span>
+              <span className="mono-label text-white/50">{t.about.strengthsLabel}</span>
               <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
                 {STRENGTHS.map((s) => (
                   <span
@@ -100,7 +97,7 @@ export default function AboutCTA() {
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[#1e1140] transition hover:shadow-[0_0_40px_rgba(255,255,255,0.35)]"
             >
-              Get in touch
+              {t.about.getInTouch}
               <span aria-hidden>→</span>
             </a>
             <a
@@ -109,7 +106,7 @@ export default function AboutCTA() {
               rel="noreferrer"
               className="rounded-full border border-white/20 bg-[#2d235c]/50 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition hover:border-white/40"
             >
-              View GitHub
+              {t.about.viewGithub}
             </a>
           </div>
         </div>
