@@ -59,6 +59,10 @@ export function llmConfigured(): boolean {
   return providers().length > 0;
 }
 
+export function providerNames(): string[] {
+  return providers().map((p) => p.name);
+}
+
 const liveModels = new Map<string, { ids: string[]; at: number }>();
 
 async function discover(p: Provider): Promise<string[] | null> {
@@ -96,10 +100,10 @@ export class LlmUnavailableError extends Error {
 }
 
 // Calls the first provider/model that works. Pass `prefer` to keep using the model that
-// answered the previous step of the same conversation.
-export async function chatCompletion(body: ChatBody, prefer?: Target) {
+// answered the previous step of the same conversation, or `only` to test a single provider.
+export async function chatCompletion(body: ChatBody, prefer?: Target, only?: string) {
   const attempts: string[] = [];
-  for (const p of providers()) {
+  for (const p of providers().filter((x) => !only || x.name === only)) {
     let models = (await candidates(p)).slice(0, MAX_MODELS_PER_PROVIDER);
     if (prefer?.provider === p.name) models = [prefer.model, ...models.filter((m) => m !== prefer.model)];
 
