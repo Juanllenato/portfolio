@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
+import { chatCompletion, llmConfigured, LlmUnavailableError, type Target } from "@/lib/llm";
+import { alertOwner } from "@/lib/alert";
+import { fallbackAnswer } from "@/lib/chat-fallback";
 
 export const runtime = "nodejs";
-
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
+export const maxDuration = 60;
 
 const SYSTEM_PROMPT = `You are the AI assistant for Juan Perez's portfolio. You speak on his behalf to recruiters, founders and potential clients. Be concise, friendly, confident and professional. Answer in the language the user writes in (English or Spanish).
 
@@ -165,27 +166,21 @@ function bookACall() {
   };
 }
 
-// Strip any tool/function syntax the model may leak into plain text
+// Strip any tool/function syntax or markdown the model may leak into plain text
+// (the chat bubble renders plain text; some models answer with **bold** and non-breaking hyphens)
 function clean(s: string): string {
   const out = (s || "")
     .replace(/<function[\s\S]*?<\/function>/gi, "")
     .replace(/<function[^>]*>/gi, "")
     .replace(/<\/function>/gi, "")
     .replace(/```[\s\S]*?```/g, "")
+    .replace(/\*\*|__/g, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[‐‑]/g, "-")
     .replace(/[ \t]{2,}/g, " ")
     .replace(/\s+([.,!?])/g, "$1")
     .trim();
   return out;
-}
-
-async function callGroq(messages: unknown[], key: string) {
-  const res = await fetch(GROQ_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: MODEL, messages, tools: TOOLS, tool_choice: "auto", temperature: 0.4 }),
-  });
-  if (!res.ok) throw new Error(`Groq ${res.status}`);
-  return res.json();
 }
 
 // Block other methods (no CORS preflight allowed)
@@ -241,16 +236,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Payload too large" }, { status: 413 });
   }
 
-  const key = process.env.GROQ_API_KEY?.trim();
+  const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content || "";
 
-  // Graceful fallback if no key configured
-  if (!key) {
-    return NextResponse.json({
-      reply:
-        lang === "es"
-          ? "Ahora mismo estoy en modo demo. Pregúntame sobre los proyectos, el stack, la experiencia o la disponibilidad de Juan — o contáctalo en LinkedIn (linkedin.com/in/juan-perez-ai-engineer)."
-          : "I'm running in demo mode right now. Ask me about Juan's projects, stack, experience or availability — or reach him on LinkedIn (linkedin.com/in/juan-perez-ai-engineer).",
-    });
+  // No LLM configured: answer from the built-in facts instead of failing
+  if (!llmConfigured()) {
+    return NextResponse.json({ reply: fallbackAnswer(lastUser, lang), degraded: true });
   }
 
   const langDirective =
@@ -260,15 +250,21 @@ export async function POST(req: NextRequest) {
 
   const convo: unknown[] = [{ role: "system", content: SYSTEM_PROMPT + langDirective }, ...messages];
 
+  let target: Target | undefined;
   try {
     for (let step = 0; step < 4; step++) {
-      const data = await callGroq(convo, key);
-      const choice = data.choices?.[0];
+      const result = await chatCompletion(
+        { messages: convo, tools: TOOLS, tool_choice: "auto", temperature: 0.4 },
+        target
+      );
+      target = result.target;
+      const choice = result.data.choices?.[0];
       const msg = choice?.message;
       if (!msg) break;
 
       if (choice.finish_reason === "tool_calls" && msg.tool_calls?.length) {
-        convo.push(msg);
+        // Re-send only the standard fields (some models add extras like `reasoning`)
+        convo.push({ role: "assistant", content: msg.content ?? "", tool_calls: msg.tool_calls });
         for (const tc of msg.tool_calls) {
           let result: unknown = {};
           let parsed: Record<string, string> = {};
@@ -302,12 +298,10 @@ export async function POST(req: NextRequest) {
           ? "Lo siento, no pude completar eso. ¿Intentamos de nuevo?"
           : "Sorry, I couldn't complete that. Try again?",
     });
-  } catch {
-    return NextResponse.json({
-      reply:
-        lang === "es"
-          ? "Estoy teniendo problemas para responder ahora mismo. Puedes contactar a Juan en LinkedIn (linkedin.com/in/juan-perez-ai-engineer) o GitHub (github.com/Juanllenato)."
-          : "I'm having trouble reaching my brain right now. You can reach Juan on LinkedIn (linkedin.com/in/juan-perez-ai-engineer) or GitHub (github.com/Juanllenato).",
-    });
+  } catch (e) {
+    const attempts = e instanceof LlmUnavailableError ? e.attempts : [String(e)];
+    console.error("[chat] LLM unavailable", attempts);
+    after(() => alertOwner("Chatbot LLM is failing", attempts));
+    return NextResponse.json({ reply: fallbackAnswer(lastUser, lang), degraded: true });
   }
 }

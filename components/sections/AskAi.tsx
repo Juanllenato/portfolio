@@ -6,6 +6,7 @@ import DecryptedText from "@/components/effects/DecryptedText";
 import Ferrofluid from "@/components/effects/Ferrofluid";
 import { renderGate } from "@/components/effects/renderGate";
 import { useT } from "@/lib/i18n";
+import { fallbackAnswer } from "@/lib/chat-fallback";
 
 type Msg = { role: "user" | "ai"; text: string };
 
@@ -98,24 +99,6 @@ function CtaButton({ href, label }: { href: string; label: string }) {
       <span aria-hidden>→</span>
     </a>
   );
-}
-
-// Offline fallback (used only if the API is unreachable)
-function fallbackAnswer(input: string, lang: "en" | "es"): string {
-  const q = input.toLowerCase();
-  const has = (...k: string[]) => k.some((w) => q.includes(w));
-  if (lang === "es") {
-    if (has("constru", "hace", "build")) return "Juan construye software AI-first de producción — asistentes LLM, RAG, apps agénticas, pipelines de OCR, automatización, backends y móvil. Desde la capa de IA hasta el despliegue.";
-    if (has("stack", "tecno")) return "Python · FastAPI · PostgreSQL/pgvector · APIs LLM · RAG · tool-calling agéntico · OCR · n8n · React/Next.js · React Native · Docker.";
-    if (has("dispon", "contrat", "remoto", "trabajo")) return "Sí — disponible para roles remotos de Ingeniero de IA (tiempo completo, contrato, freelance). Zona horaria LatAm, se solapa con EE. UU.";
-    if (has("contact", "correo", "mensaje", "linkedin", "llama")) return "Contacta a Juan en LinkedIn: linkedin.com/in/juan-perez-ai-engineer o GitHub: github.com/Juanllenato.";
-    return "Pregúntame sobre los proyectos, el stack, la experiencia o la disponibilidad de Juan. (Modo demo — conecta una API key para la IA completa.)";
-  }
-  if (has("build", "do", "make")) return "Juan builds production AI-first software — LLM assistants, RAG, agentic apps, OCR pipelines, automation, backends and mobile. From the AI layer to deployment.";
-  if (has("stack", "tech")) return "Python · FastAPI · PostgreSQL/pgvector · LLM APIs · RAG · agentic tool-calling · OCR · n8n · React/Next.js · React Native · Docker.";
-  if (has("available", "hire", "remote", "job")) return "Yes — open to remote AI Engineer roles (full-time, contract, freelance). LatAm time zone, overlaps with US hours.";
-  if (has("contact", "email", "message", "linkedin", "call")) return "Reach Juan on LinkedIn: linkedin.com/in/juan-perez-ai-engineer or GitHub: github.com/Juanllenato.";
-  return "Ask me about Juan's projects, stack, experience or availability. (Demo mode — connect a key for full AI.)";
 }
 
 export default function AskAi({ startDelay = 0 }: { startDelay?: number }) {
