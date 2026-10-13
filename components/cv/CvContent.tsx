@@ -78,6 +78,15 @@ const en: CvDict = {
         "Also delivered 4+ production web and e-commerce platforms and n8n AI automations for clients (Pontebela, PrevenSalud, Grupo Alianza Vital).",
       ],
     },
+    {
+      role: "Freelance Web Developer",
+      org: "Independent — Colombia (Remote)",
+      period: "2020 – 2023",
+      bullets: [
+        "Built websites and online stores for small businesses on WordPress and WooCommerce, with custom Astra child themes, PHP page templates and mobile-first CSS.",
+        "Ran each project end to end: requirements with the client, design, build, launch and maintenance.",
+      ],
+    },
   ],
   projects: [
     { name: "Sin Frontera — AI Sales Agent for B2B Real Estate (Colombia)", status: "Pilot", url: "sinfrontera.aineatech.com", desc: "WhatsApp agent for an industrial real-estate firm (about 100 properties, 1,200–1,500 leads/month) that qualifies leads and books site visits. Hybrid retrieval (SQL filters + Spanish full-text + pgvector/Voyage embeddings, fused with RRF), 11 agent tools plus a 12-tool internal assistant for the team. 43 eval scenarios with an LLM judge, 540+ tests, 30 ADRs. Running as a supervised shadow-mode pilot." },
@@ -131,6 +140,15 @@ const es: CvDict = {
         "Multi-tenancy con row-level security en Postgres, credenciales cifradas con AES-256-GCM y alta de clientes como \"configuración, no código\". Integración profunda con Meta: WhatsApp Cloud API, Coexistencia, Embedded Signup, Conversions API, Marketing API.",
         "Operación en producción: Docker + Caddy en Hetzner, CI/CD en GitHub Actions con rollback automático, colas pg-boss, pilotos en modo sombra con revisión humana, ADRs y runbooks por producto.",
         "Además entregué más de 4 plataformas web y de e-commerce en producción y automatizaciones con IA en n8n para clientes (Pontebela, PrevenSalud, Grupo Alianza Vital).",
+      ],
+    },
+    {
+      role: "Desarrollador web freelance",
+      org: "Independiente — Colombia (Remoto)",
+      period: "2020 – 2023",
+      bullets: [
+        "Construí sitios web y tiendas en línea para pequeños negocios con WordPress y WooCommerce: temas hijo de Astra a medida, plantillas PHP y CSS mobile-first.",
+        "Llevé cada proyecto de punta a punta: requisitos con el cliente, diseño, desarrollo, lanzamiento y mantenimiento.",
       ],
     },
   ],
